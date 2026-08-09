@@ -28,7 +28,8 @@ export default function TeamManagementScreen() {
 
     try {
       // Invite via simulated gateway API
-      const res = await fetch(`http://localhost:8787/org/${org?.id}/invite`, {
+      const GATEWAY_URL = process.env.EXPO_PUBLIC_GATEWAY_URL || "http://localhost:8787";
+      const res = await fetch(`${GATEWAY_URL}/org/${org?.id}/invite`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${ssoToken}`,
@@ -54,7 +55,8 @@ export default function TeamManagementScreen() {
 
   const handleRemoveMember = async (userId: string) => {
     try {
-      const res = await fetch(`http://localhost:8787/org/${org?.id}/member/${userId}`, {
+      const GATEWAY_URL = process.env.EXPO_PUBLIC_GATEWAY_URL || "http://localhost:8787";
+      const res = await fetch(`${GATEWAY_URL}/org/${org?.id}/member/${userId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${ssoToken}`,

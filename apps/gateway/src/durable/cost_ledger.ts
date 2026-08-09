@@ -41,7 +41,7 @@ export class CostLedger {
         try {
           const row = await this.env.DB.prepare(
             "SELECT SUM(amount_cents) as total FROM cost_ledger WHERE user_id = ? AND created_at >= ?"
-          ).bind(userId, `${today}T00:00:00.000Z`).first<{ total: number }>();
+          ).bind(userId, `${today}T00:00:00.000Z`).first() as { total: number } | null;
           newTotal = row?.total || cost;
         } catch {
           // Fallback to local
@@ -67,7 +67,7 @@ export class CostLedger {
         try {
           const row = await this.env.DB.prepare(
             "SELECT SUM(amount_cents) as total FROM cost_ledger WHERE user_id = ? AND created_at >= ?"
-          ).bind(userId, `${today}T00:00:00.000Z`).first<{ total: number }>();
+          ).bind(userId, `${today}T00:00:00.000Z`).first() as { total: number } | null;
           totalCost = row?.total || 0;
           this.cache.set(key, totalCost);
         } catch (err: any) {

@@ -1,185 +1,81 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from "react-native";
 import { useAtom } from "jotai";
-import * as LocalAuthentication from "expo-local-authentication";
-import { identityAtom } from "../store";
-import { ArchonBridge } from "../services/ArchonBridge";
-import { SecureStoreService } from "../services/SecureStore";
+import { hasOnboardedAtom } from "../store";
 
-// WHY: OnboardingScreen handles the FaceID registration, key derivation, and initial twin setup
-export const OnboardingScreen = ({ navigation }: { navigation: any }) => {
-  const [, setIdentity] = useAtom(identityAtom);
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("");
+const { width } = Dimensions.get("window");
 
-  const handleBirthTwin = async () => {
-    setLoading(true);
-    setStatus("Verifying biometrics...");
-    
-    try {
-      // 1. Biometric verification
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      
-      if (hasHardware && isEnrolled) {
-        const auth = await LocalAuthentication.authenticateAsync({
-          promptMessage: "Verify identity to birth your digital twin",
-          fallbackLabel: "Use PIN/Passcode"
-        });
-        
-        if (!auth.success) {
-          Alert.alert("Biometric Failed", "Authentication was canceled or failed.");
-          setLoading(false);
-          setStatus("");
-          return;
-        }
-      }
-      
-      setStatus("Generating cryptographic identity in enclave...");
-      
-      // 2. Call Wasm core to generate Ed25519 key pair
-      const publicKeyHex = await ArchonBridge.generateKeys();
-      setIdentity(publicKeyHex);
-      
-      // Save biometric preferences and complete onboarding
-      await SecureStoreService.setBiometricPreference(true);
-      
-      setStatus("Initializing encrypted memory vault...");
-      // Simulate small entropy seed storage
-      const mockMasterSeed = Math.random().toString(36).substring(2, 34);
-      await SecureStoreService.setMasterSeed(mockMasterSeed);
-      
-      setStatus("Twin born successfully!");
-      
-      setTimeout(() => {
-        setLoading(false);
-        // Navigate to dashboard
-        navigation.replace("Dashboard");
-      }, 1000);
-      
-    } catch (error: any) {
-      Alert.alert("Birth Failure", error.message || "An unexpected error occurred during setup.");
-      setLoading(false);
-      setStatus("");
+const SLIDES = [
+  {
+    id: "1",
+    title: "Encrypted By Default",
+    desc: "Your data stays on-device in a secure WASM enclave. Archon never reads your private memory.",
+  },
+  {
+    id: "2",
+    title: "Autonomous Actions",
+    desc: "Deploy AI twins that act on your behalf, paying for services using crypto-native FinOps.",
+  },
+  {
+    id: "3",
+    title: "Peer-to-Peer Swarm",
+    desc: "Your enclave communicates directly with trusted peers over encrypted relays. No centralized servers.",
+  }
+];
+
+export default function OnboardingScreen({ navigation }: any) {
+  const [hasOnboarded, setHasOnboarded] = useAtom(hasOnboardedAtom);
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  const handleNext = () => {
+    if (activeSlide < SLIDES.length - 1) {
+      setActiveSlide(activeSlide + 1);
+    } else {
+      setHasOnboarded(true);
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.title}>ARCHON</Text>
-        <Text style={styles.subtitle}>Self-Evolving Personal Digital Twin</Text>
+      <View style={styles.slideContent}>
+        <View style={styles.iconPlaceholder} />
+        <Text style={styles.title}>{SLIDES[activeSlide].title}</Text>
+        <Text style={styles.desc}>{SLIDES[activeSlide].desc}</Text>
       </View>
 
-      <View style={styles.infoBox}>
-        <Text style={styles.infoTitle}>Zero-Trust Foundation</Text>
-        <Text style={styles.infoText}>
-          Your twin runs locally using WebAssembly. All memory blocks are encrypted with AES-256-GCM. 
-          Identity verification keys never leave this device.
-        </Text>
-      </View>
-
-      {loading ? (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#60a5fa" />
-          <Text style={styles.statusText}>{status}</Text>
+      <View style={styles.footer}>
+        <View style={styles.dotsRow}>
+          {SLIDES.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                activeSlide === index && styles.dotActive
+              ]}
+            />
+          ))}
         </View>
-      ) : (
-        <TouchableOpacity style={styles.btnBirth} onPress={handleBirthTwin}>
-          <Text style={styles.btnText}>Birth My Twin</Text>
-        </TouchableOpacity>
-      )}
 
-      <TouchableOpacity
-        style={styles.btnRecovery}
-        onPress={() => navigation.navigate("RecoverySetup")}
-        disabled={loading}
-      >
-        <Text style={styles.btnRecoveryText}>Configure Key Recovery</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.btn} onPress={handleNext}>
+          <Text style={styles.btnText}>
+            {activeSlide === SLIDES.length - 1 ? "Enter Enclave" : "Next"}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0b0f19",
-    padding: 24,
-    justifyContent: "space-between",
-  },
-  headerContainer: {
-    alignItems: "center",
-    marginTop: 64,
-  },
-  title: {
-    color: "#ffffff",
-    fontSize: 42,
-    fontWeight: "900",
-    letterSpacing: 4,
-  },
-  subtitle: {
-    color: "#60a5fa",
-    fontSize: 14,
-    fontWeight: "600",
-    marginTop: 8,
-    letterSpacing: 0.5,
-  },
-  infoBox: {
-    backgroundColor: "#111827",
-    borderWidth: 1,
-    borderColor: "#1f2937",
-    borderRadius: 16,
-    padding: 20,
-    marginVertical: 40,
-  },
-  infoTitle: {
-    color: "#f3f4f6",
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  infoText: {
-    color: "#9ca3af",
-    fontSize: 14,
-    lineHeight: 22,
-  },
-  loaderContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 100,
-  },
-  statusText: {
-    color: "#60a5fa",
-    fontSize: 14,
-    marginTop: 12,
-    fontWeight: "500",
-  },
-  btnBirth: {
-    backgroundColor: "#2563eb",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    shadowColor: "#2563eb",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  btnText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "800",
-    letterSpacing: 1,
-  },
-  btnRecovery: {
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  btnRecoveryText: {
-    color: "#9ca3af",
-    fontSize: 14,
-    textDecorationLine: "underline",
-    fontWeight: "500",
-  },
+  container: { flex: 1, backgroundColor: "#0b0f19", justifyContent: "space-between" },
+  slideContent: { flex: 1, justifyContent: "center", padding: 32 },
+  iconPlaceholder: { width: 80, height: 80, borderRadius: 20, backgroundColor: "#1e293b", marginBottom: 32, alignSelf: "center", borderWidth: 1, borderColor: "#334155" },
+  title: { color: "#f3f4f6", fontSize: 28, fontWeight: "800", textAlign: "center", marginBottom: 16 },
+  desc: { color: "#9ca3af", fontSize: 16, textAlign: "center", lineHeight: 24 },
+  footer: { padding: 32, paddingBottom: 48 },
+  dotsRow: { flexDirection: "row", justifyContent: "center", marginBottom: 32, gap: 8 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#374151" },
+  dotActive: { backgroundColor: "#60a5fa", width: 24 },
+  btn: { backgroundColor: "#2563eb", borderRadius: 12, paddingVertical: 16, alignItems: "center" },
+  btnText: { color: "#ffffff", fontSize: 16, fontWeight: "700" }
 });

@@ -36,7 +36,7 @@ export const gatewayTools = {
     ...auditExportTools.manifest
   ],
 
-  async handle(toolName: string, args: any): Promise<any> {
+  async handle(toolName: string, args: any, db?: any): Promise<any> {
     if (toolName.startsWith("email.")) {
       return emailTools.handle(toolName, args);
     }
@@ -80,7 +80,7 @@ export const gatewayTools = {
       return developerAgentTools.handle(toolName, args);
     }
     if (toolName.startsWith("org.")) {
-      return orgManagementTools.handle(toolName, args);
+      return orgManagementTools.handle(toolName, args, db);
     }
     if (toolName.startsWith("audit.")) {
       return auditExportTools.handle(toolName, args);

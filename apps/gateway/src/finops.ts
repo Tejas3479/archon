@@ -11,7 +11,7 @@ export async function checkBudget(userId: string, env: any): Promise<boolean> {
     // Query D1 SUM
     const row = await env.DB.prepare(
       "SELECT SUM(amount_cents) as total FROM cost_ledger WHERE user_id = ? AND created_at >= ?"
-    ).bind(userId, midnight).first<{ total: number | null }>();
+    ).bind(userId, midnight).first() as { total: number | null } | null;
 
     const totalCents = row?.total || 0;
     const withinBudget = totalCents < DAILY_BUDGET_CENTS;
@@ -38,7 +38,7 @@ export async function charge(userId: string, amountCents: number, env: any): Pro
     const midnight = `${today}T00:00:00.000Z`;
     const row = await env.DB.prepare(
       "SELECT SUM(amount_cents) as total FROM cost_ledger WHERE user_id = ? AND created_at >= ?"
-    ).bind(userId, midnight).first<{ total: number | null }>();
+    ).bind(userId, midnight).first() as { total: number | null } | null;
     
     const newTotal = row?.total || amountCents;
 

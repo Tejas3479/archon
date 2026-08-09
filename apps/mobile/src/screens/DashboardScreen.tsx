@@ -108,78 +108,32 @@ export const DashboardScreen = ({ navigation }: any) => {
       {/* Navigation Shortcuts */}
       <View style={styles.navGrid}>
         <View style={styles.navRow}>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("Preferences")}>
-            <Text style={styles.navBtnText}>Settings</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("ActivityLog")}>
-            <Text style={styles.navBtnText}>Logs</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("Family")}>
-            <Text style={styles.navBtnText}>Swarm</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.navRow}>
           <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("FinanceDashboard")}>
-            <Text style={styles.navBtnText}>Finance</Text>
+            <Text style={styles.navBtnText}>💸 Finance</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("HealthDashboard")}>
-            <Text style={styles.navBtnText}>Health</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("HomeAutomation")}>
-            <Text style={styles.navBtnText}>Home</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.navRow}>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("SocialDashboard")}>
-            <Text style={styles.navBtnText}>Social</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("CredentialManager")}>
-            <Text style={styles.navBtnText}>Wallet</Text>
+            <Text style={styles.navBtnText}>❤️ Health</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.navRow}>
           <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("Voice")}>
             <Text style={styles.navBtnText}>🎙️ Voice</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("SpatialView")}>
-            <Text style={styles.navBtnText}>🔮 Spatial</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("TravelDashboard")}>
-            <Text style={styles.navBtnText}>✈️ Travel</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.navRow}>
           <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("ReflectionReport")}>
             <Text style={styles.navBtnText}>📊 Reflection</Text>
           </TouchableOpacity>
+        </View>
+        <View style={styles.navRow}>
           <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("SkillMarketplace")}>
             <Text style={styles.navBtnText}>📥 Skills</Text>
           </TouchableOpacity>
-        </View>
-        <View style={styles.navRow}>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("RSIReview")}>
-            <Text style={styles.navBtnText}>🔧 RSI Review</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("DeFiDashboard")}>
-            <Text style={styles.navBtnText}>🪙 DeFi Swap</Text>
+          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("Family")}>
+            <Text style={styles.navBtnText}>🌐 Swarm</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.navRow}>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("DeepfakeAlerts")}>
-            <Text style={styles.navBtnText}>🛡️ Deepfake</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("GDPRSettings")}>
-            <Text style={styles.navBtnText}>🧹 GDPR Wipe</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.navRow}>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("AdminDashboard")}>
-            <Text style={styles.navBtnText}>🏢 Admin Dash</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate("SSOLogin")}>
-            <Text style={styles.navBtnText}>🔑 SSO Login</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={{marginTop: 8}} onPress={() => navigation.navigate("AdminDashboard")}>
+          <Text style={{color: "#6b7280", fontSize: 11, textAlign: "center"}}>Switch to Enterprise Admin</Text>
+        </TouchableOpacity>
       </View>
 
 

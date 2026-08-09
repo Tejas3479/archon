@@ -39,8 +39,10 @@ export default function DashboardPage() {
   useEffect(() => {
     async function getGatewayStats() {
       try {
-        const res = await fetch("http://localhost:8787/org/org_123/stats", {
-          headers: { "Authorization": "Bearer mock_sso_token_123" }
+        const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8787";
+        const API_KEY = process.env.NEXT_PUBLIC_GATEWAY_API_KEY || "archon_demo_secret_2026";
+        const res = await fetch(`${GATEWAY_URL}/org/org_123/stats`, {
+          headers: { "Authorization": `Bearer ${API_KEY}` }
         });
         if (res.ok) {
           const data = await res.json();
@@ -55,8 +57,8 @@ export default function DashboardPage() {
 
   if (status !== "authenticated") {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-slate-400">Loading Session...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-secondary animate-pulse">Loading Secure Session...</div>
       </div>
     );
   }
@@ -64,34 +66,34 @@ export default function DashboardPage() {
   return (
     <Layout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Organization Overview</h1>
-        <p className="text-sm text-slate-400 mt-1">Aggregated statistics across all active twin enclaves</p>
+        <h1 className="text-3xl font-bold text-primary tracking-tight">Organization Overview</h1>
+        <p className="text-sm text-secondary mt-2">Aggregated statistics across all active twin enclaves</p>
       </div>
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-          <span className="text-xs font-semibold text-slate-400 uppercase">Active Twins</span>
-          <h2 className="text-3xl font-extrabold text-blue-500 mt-2">{stats.activeAgents}</h2>
-          <p className="text-xs text-slate-500 mt-2">Active running workspaces</p>
+        <div className="bg-glass backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-[0_4px_24px_rgba(0,0,0,0.3)] shadow-accent-glow">
+          <span className="text-xs font-semibold text-secondary uppercase tracking-widest">Active Twins</span>
+          <h2 className="text-4xl font-extrabold text-accent-primary mt-3">{stats.activeAgents}</h2>
+          <p className="text-xs text-muted mt-2 font-mono">Running workspaces</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-          <span className="text-xs font-semibold text-slate-400 uppercase">Total Executions</span>
-          <h2 className="text-3xl font-extrabold text-blue-500 mt-2">{stats.totalActions}</h2>
-          <p className="text-xs text-slate-500 mt-2">API and Tool runs computed</p>
+        <div className="bg-glass backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-[0_4px_24px_rgba(0,0,0,0.3)] shadow-accent-glow">
+          <span className="text-xs font-semibold text-secondary uppercase tracking-widest">Total Executions</span>
+          <h2 className="text-4xl font-extrabold text-accent-primary mt-3">{stats.totalActions}</h2>
+          <p className="text-xs text-muted mt-2 font-mono">API and Tool runs computed</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-          <span className="text-xs font-semibold text-slate-400 uppercase">Cycle Billing Cost</span>
-          <h2 className="text-3xl font-extrabold text-emerald-400 mt-2">${(stats.totalCost / 100).toFixed(2)}</h2>
-          <p className="text-xs text-slate-500 mt-2">Daily Budget: $50.00</p>
+        <div className="bg-glass backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-[0_4px_24px_rgba(0,0,0,0.3)] shadow-accent-glow">
+          <span className="text-xs font-semibold text-secondary uppercase tracking-widest">Cycle Billing Cost</span>
+          <h2 className="text-4xl font-extrabold text-success mt-3">${(stats.totalCost / 100).toFixed(2)}</h2>
+          <p className="text-xs text-muted mt-2 font-mono">Daily Budget: $50.00</p>
         </div>
       </div>
 
       {/* Charts */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 mb-6">
-        <h3 className="text-sm font-bold uppercase text-slate-300 mb-6">Daily Activity & Spending</h3>
+      <div className="bg-glass backdrop-blur-md border border-white/10 rounded-2xl p-6 mb-6">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-secondary mb-6">Daily Activity & Spending</h3>
         
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">

@@ -96,7 +96,7 @@ export class TokenManager {
       if (!tokenData) {
         // Cache miss: query D1
         try {
-          const row = await this.env.DB.prepare("SELECT * FROM access_tokens WHERE token_id = ? LIMIT 1").bind(tokenId).first<any>();
+          const row = await this.env.DB.prepare("SELECT * FROM access_tokens WHERE token_id = ? LIMIT 1").bind(tokenId).first() as any;
           if (row) {
             tokenData = {
               userId: row.user_id,

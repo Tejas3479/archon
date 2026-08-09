@@ -25,7 +25,8 @@ export default function AdminDashboardScreen({ navigation }: any) {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8787/org/${org?.id}/stats`, {
+      const GATEWAY_URL = process.env.EXPO_PUBLIC_GATEWAY_URL || "http://localhost:8787";
+      const res = await fetch(`${GATEWAY_URL}/org/${org?.id}/stats`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${ssoToken}`,
