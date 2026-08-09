@@ -331,18 +331,15 @@ app.get("/org/:orgId/audit", async (c) => {
     const orgId = c.req.param("orgId");
     const format = c.req.query("format");
     if (format === "csv") {
-      const csv = auditExportTools.generateCSV(orgId);
+      const csv = await auditExportTools.generateCSV(c.env.DB, orgId);
       return c.body(csv, 200, {
         "Content-Type": "text/csv",
         "Content-Disposition": `attachment; filename="audit_${orgId}.csv"`
       });
     } else if (format === "json") {
-      // Mocked audit trail for demo
+      const logs = await auditExportTools.handle("audit.get_logs", { orgId }, c.env.DB);
       return c.json({
-        audit_logs: [
-          { timestamp: new Date().toISOString(), user: "user_admin", action: "ORG_CREATED" },
-          { timestamp: new Date().toISOString(), user: "system", action: "SECURITY_SCAN_PASSED" }
-        ]
+        audit_logs: logs
       });
     }
     return c.json({ error: "Unsupported format" }, 400);

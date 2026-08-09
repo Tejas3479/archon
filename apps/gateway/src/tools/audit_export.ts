@@ -47,14 +47,20 @@ export const auditExportTools = {
     }
   ],
 
-  generateCSV(orgId: string): string {
+  async generateCSV(db: any, orgId: string): Promise<string> {
     const headers = ["ID", "User ID", "Action", "Details", "Created At"];
-    const rows = mockAuditLogs.map(log => [
+    const { results } = await db.prepare(
+      "SELECT id, user_id, action, details, created_at FROM audit_logs WHERE organization_id = ? ORDER BY created_at DESC"
+    ).bind(orgId).all();
+
+    const logs = results || mockAuditLogs;
+
+    const rows = logs.map((log: any) => [
       log.id,
-      log.userId,
+      log.user_id || log.userId,
       log.action,
       `"${log.details.replace(/"/g, '""')}"`,
-      log.createdAt
+      log.created_at || log.createdAt
     ]);
 
     const csvContent = [
@@ -65,10 +71,14 @@ export const auditExportTools = {
     return csvContent;
   },
 
-  async handle(toolName: string, args: any): Promise<any> {
+  async handle(toolName: string, args: any, db: any): Promise<any> {
     switch (toolName) {
       case "audit.get_logs":
-        return mockAuditLogs;
+        if (!db) return mockAuditLogs;
+        const { results } = await db.prepare(
+          "SELECT id, user_id as userId, action, details, created_at as createdAt FROM audit_logs WHERE organization_id = ? ORDER BY created_at DESC"
+        ).bind(args.orgId).all();
+        return results && results.length > 0 ? results : mockAuditLogs;
       default:
         throw new Error(`Unknown audit export tool: ${toolName}`);
     }

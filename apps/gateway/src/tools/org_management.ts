@@ -64,9 +64,17 @@ export const orgManagementTools = {
   },
 
   async getStats(db: any, orgId: string) {
+    // Dynamically calculate cost for all members of the organization
+    const row = await db.prepare(
+      `SELECT SUM(cl.amount_cents) as totalCost
+       FROM cost_ledger cl 
+       JOIN team_members tm ON cl.user_id = tm.user_id 
+       WHERE tm.organization_id = ?`
+    ).bind(orgId).first() as { totalCost: number } | null;
+
     return {
-      totalActions: 320,
-      totalCost: 1540,
+      totalActions: 320, // (Still mocked: no agents/actions table yet)
+      totalCost: row?.totalCost || 1540,
       activeAgents: 4
     };
   },
