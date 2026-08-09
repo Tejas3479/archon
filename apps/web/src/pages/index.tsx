@@ -333,8 +333,8 @@ export default function LandingPage() {
           <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5" aria-label="Archon home">
-              <div className="p-1.5 rounded-lg bg-accent-glow">
-                <Shield size={20} className="text-accent-primary" />
+              <div className="w-7 h-7 rounded-md overflow-hidden border border-accent-primary/20 shadow-[0_0_12px_rgba(99,102,241,0.3)]">
+                <img src="/favicon.jpg" alt="Archon" className="w-full h-full object-cover" />
               </div>
               <span className="font-bold text-text-primary tracking-tight">Archon</span>
               <span className="text-[10px] font-bold text-accent-secondary bg-accent-primary/10 border border-accent-primary/20 px-2 py-0.5 rounded-full">

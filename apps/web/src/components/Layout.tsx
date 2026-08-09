@@ -25,8 +25,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <>
       <div>
         <div className="flex items-center gap-3 mb-8 px-2">
-          <div className="p-1.5 rounded-lg bg-accent-glow border border-accent-primary/20">
-            <Shield className="text-accent-primary" size={24} />
+          <div className="w-8 h-8 rounded-lg overflow-hidden border border-accent-primary/20 shadow-[0_0_12px_rgba(99,102,241,0.3)] flex-shrink-0">
+            <img src="/favicon.jpg" alt="Archon Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <h2 className="font-bold text-sm text-text-primary tracking-tight">Archon Admin</h2>
@@ -80,7 +80,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-white/10 bg-bg-secondary/80 backdrop-blur-md sticky top-0 z-40">
         <div className="flex items-center gap-2.5">
-          <Shield className="text-accent-primary" size={20} />
+          <div className="w-6 h-6 rounded-md overflow-hidden border border-accent-primary/20 shadow-[0_0_8px_rgba(99,102,241,0.3)] flex-shrink-0">
+            <img src="/favicon.jpg" alt="Archon Logo" className="w-full h-full object-cover" />
+          </div>
           <span className="font-bold text-sm">Archon</span>
         </div>
         <button 

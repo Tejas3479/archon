@@ -39,8 +39,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-bg-primary text-text-primary flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-glass backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.3)] shadow-accent-glow">
         <div className="text-center mb-8 flex flex-col items-center">
-          <div className="bg-accent-glow p-4 rounded-full text-accent-primary mb-4">
-            <Shield size={32} />
+          <div className="w-16 h-16 rounded-2xl overflow-hidden border border-accent-primary/20 shadow-[0_0_24px_rgba(99,102,241,0.4)] mb-4">
+            <img src="/favicon.jpg" alt="Archon Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold mt-2 text-text-primary">Archon Enterprise Portal</h1>
           <p className="text-sm text-text-secondary mt-2">Sign in using Single Sign-On (SSO)</p>
