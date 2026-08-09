@@ -2,7 +2,6 @@
 
 > Archon is an autonomous, on-device AI twin that acts on your behalf, paying for services using crypto-native FinOps, while keeping your private data strictly within a secure WASM enclave.
 
-Built for the 2026 Global AI Hackathon.
 
 ## System Architecture
 
