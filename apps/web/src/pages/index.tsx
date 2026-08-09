@@ -766,14 +766,13 @@ export default function LandingPage() {
                       <Code2 size={14} className="text-accent-secondary" />
                       <span className="text-xs font-mono text-text-muted">vault.rs</span>
                     </div>
-                    <div className="p-5 font-mono text-xs leading-relaxed">
+                    <div className="p-5 font-mono text-xs leading-relaxed overflow-x-auto whitespace-nowrap">
                       <div className="text-text-muted">{"// Zero plaintext. Ever."}</div>
                       <div className="mt-2 space-y-1">
                         <div><span className="text-pqc">pub fn </span><span className="text-accent-secondary">encrypt</span><span className="text-text-primary">{"(data: &[u8], key: &[u8; 32])"}</span></div>
                         <div className="pl-4"><span className="text-text-secondary">{"-> Result<Vec<u8>, VaultError> {"}</span></div>
                         <div className="pl-8"><span className="text-pqc">let </span><span className="text-text-primary">cipher = </span><span className="text-accent-secondary">Aes256Gcm</span><span className="text-text-primary">::new(key.into());</span></div>
-                        <div className="pl-8"><span className="text-pqc">let </span><span className="text-text-primary">nonce = </span><span className="text-accent-secondary">Aes256Gcm</span></div>
-                        <div className="pl-12"><span className="text-text-primary">::generate_nonce(&mut OsRng);</span></div>
+                        <div className="pl-8"><span className="text-pqc">let </span><span className="text-text-primary">nonce = </span><span className="text-accent-secondary">Aes256Gcm</span><span className="text-text-primary">::generate_nonce(&mut OsRng);</span></div>
                         <div className="pl-8 text-success">{"// ← sealed inside WASM enclave"}</div>
                         <div className="pl-8"><span className="text-text-primary">cipher.</span><span className="text-accent-secondary">encrypt</span><span className="text-text-primary">(&nonce, data)?</span></div>
                         <div className="pl-4 text-text-primary">{"}"}</div>
