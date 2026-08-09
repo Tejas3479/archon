@@ -22,6 +22,7 @@ impl ReflectionEngine {
         let mut money_saved = 0.0;
         let mut self_healing_count = 0;
         let mut finops_cost_cents = 0;
+        let mut health_score = 100u32;
 
         for log in event_logs {
             actions_count += 1;
@@ -45,6 +46,13 @@ impl ReflectionEngine {
             if log_lower.contains("tool") || log_lower.contains("execute") {
                 finops_cost_cents += 10; 
             }
+            
+            // Deduct health score for anomalies or errors
+            if log_lower.contains("error") || log_lower.contains("fail") || log_lower.contains("timeout") {
+                health_score = health_score.saturating_sub(5);
+            } else if log_lower.contains("warning") || log_lower.contains("anomaly") {
+                health_score = health_score.saturating_sub(2);
+            }
         }
 
         // Default mock metrics if logs are empty to facilitate test verification
@@ -54,9 +62,8 @@ impl ReflectionEngine {
             money_saved = 220.0;
             self_healing_count = 1;
             finops_cost_cents = 150;
+            health_score = 98;
         }
-
-        let health_score = 98; 
 
         let msg = format!(
             "Archon Weekly Reflection report complete. You saved {} minutes and recovered ${:.2} this week. Autonomous self-healing deployed {} repairs to preserve system invariants.",

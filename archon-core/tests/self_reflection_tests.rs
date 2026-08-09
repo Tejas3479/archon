@@ -31,6 +31,23 @@ fn test_reflection_report_with_logs() {
     assert_eq!(report.money_saved_dollars, 150.0 + 70.0);      // 220.0
     assert_eq!(report.self_healing_count, 1);
     assert_eq!(report.total_finops_cost_cents, 10);
+    assert_eq!(report.health_score, 100);
     assert!(report.message.contains("saved 70 minutes"));
     assert!(report.message.contains("recovered $220.00"));
+}
+
+#[test]
+fn test_reflection_report_health_score_deductions() {
+    let logs = vec![
+        "Error parsing date format".to_string(), // -5
+        "Warning: API rate limit approaching".to_string(), // -2
+        "Timeout connecting to database".to_string(), // -5
+        "Detected anomaly in temperature readings".to_string(), // -2
+        "Failed to authenticate".to_string(), // -5
+    ];
+    
+    let report = ReflectionEngine::generate_report(&logs).unwrap();
+    assert_eq!(report.actions_count, 5);
+    // 100 - 5 - 2 - 5 - 2 - 5 = 81
+    assert_eq!(report.health_score, 81);
 }
