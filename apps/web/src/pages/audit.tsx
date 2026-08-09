@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Layout from "../components/Layout";
+import { Download } from "lucide-react";
 
 interface AuditRecord {
   id: string;
@@ -79,34 +80,34 @@ export default function AuditPage() {
     <Layout>
       <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Compliance Audit Logs</h1>
-          <p className="text-sm text-slate-400 mt-1">Exportable historical logs of all agent actions and operations</p>
+          <h1 className="text-2xl font-bold text-text-primary">Compliance Audit Logs</h1>
+          <p className="text-sm text-text-secondary mt-1">Exportable historical logs of all agent actions and operations</p>
         </div>
 
         <button
           onClick={handleDownloadCSV}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-lg text-sm transition-colors duration-150 flex items-center gap-2"
+          className="bg-accent-primary hover:bg-accent-secondary text-white font-bold px-5 py-2.5 rounded-lg text-sm transition-all duration-150 flex items-center gap-2 shadow-[0_0_16px_rgba(99,102,241,0.2)] hover:shadow-[0_0_24px_rgba(99,102,241,0.4)]"
         >
-          📥 Download Audit Report (.CSV)
+          <Download size={16} /> Download Audit Report (.CSV)
         </button>
       </div>
 
       {/* Filter and Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-        <div className="p-6 border-b border-slate-800 flex flex-col md:flex-row gap-4 justify-between items-center">
-          <h3 className="text-sm font-bold uppercase text-slate-300">Operations Feed</h3>
+      <div className="bg-glass backdrop-blur-md border border-white/10 rounded-xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+        <div className="p-6 border-b border-white/5 flex flex-col md:flex-row gap-4 justify-between items-center">
+          <h3 className="text-sm font-bold uppercase text-text-secondary tracking-widest">Operations Feed</h3>
           <input
             type="text"
             value={filterUser}
             onChange={(e) => setFilterUser(e.target.value)}
             placeholder="Filter by user or action..."
-            className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-slate-100 text-xs focus:outline-none focus:border-blue-500 w-full md:w-64"
+            className="bg-bg-elevated border border-white/10 rounded-lg px-4 py-2 text-text-primary text-xs focus:outline-none focus:border-accent-primary focus:ring-2 focus:ring-accent-glow w-full md:w-64 transition-all"
           />
         </div>
 
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-950 text-slate-400 text-xs uppercase font-bold border-b border-slate-800">
+            <tr className="bg-white/5 text-text-secondary text-xs uppercase font-bold border-b border-white/10 tracking-wider">
               <th className="p-4">Log ID</th>
               <th className="p-4">Operator</th>
               <th className="p-4">Action</th>
@@ -116,12 +117,12 @@ export default function AuditPage() {
           </thead>
           <tbody>
             {filteredLogs.map((log) => (
-              <tr key={log.id} className="border-b border-slate-800 hover:bg-slate-800/10 transition-colors duration-100">
-                <td className="p-4 text-xs font-mono text-blue-400">{log.id}</td>
-                <td className="p-4 text-sm font-semibold">{log.userId}</td>
-                <td className="p-4 text-xs font-bold uppercase text-slate-300">{log.action}</td>
-                <td className="p-4 text-sm text-slate-300">{log.details}</td>
-                <td className="p-4 text-xs text-slate-400">{log.createdAt}</td>
+              <tr key={log.id} className="border-b border-white/5 hover:bg-white/5 transition-colors duration-100">
+                <td className="p-4 text-xs font-mono text-accent-secondary">{log.id}</td>
+                <td className="p-4 text-sm font-semibold font-mono text-text-primary">{log.userId}</td>
+                <td className="p-4 text-xs font-bold uppercase text-text-secondary">{log.action}</td>
+                <td className="p-4 text-sm text-text-secondary">{log.details}</td>
+                <td className="p-4 text-xs text-text-muted font-mono">{log.createdAt}</td>
               </tr>
             ))}
           </tbody>

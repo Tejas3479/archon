@@ -11,11 +11,17 @@ module.exports = {
         mono: ['var(--font-mono)', 'monospace'],
       },
       colors: {
-        background: "#080c14",
-        card: "#111827",
-        primary: "#e8edf5",
-        secondary: "#8494a8",
-        muted: "#4a5568",
+        bg: {
+          primary: "#080c14",
+          secondary: "#0e1623",
+          elevated: "#141e2e",
+          glass: "rgba(14,22,35,0.7)",
+        },
+        text: {
+          primary: "#e8edf5",
+          secondary: "#8494a8",
+          muted: "#4a5568",
+        },
         accent: {
           primary: "#6366f1",
           secondary: "#818cf8",
