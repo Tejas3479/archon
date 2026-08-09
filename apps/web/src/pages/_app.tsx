@@ -6,6 +6,8 @@ import { Toaster } from "react-hot-toast";
 
 import "../css/globals.css";
 
+import Head from "next/head";
+
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space",
@@ -19,6 +21,9 @@ const jetbrainsMono = JetBrains_Mono({
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
     <SessionProvider session={session}>
+      <Head>
+        <link rel="icon" type="image/jpeg" href="/favicon.jpg" />
+      </Head>
       <main className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans`}>
         <Component {...pageProps} />
         <Toaster 
