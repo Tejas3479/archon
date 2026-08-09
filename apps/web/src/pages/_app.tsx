@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import type { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+import Lenis from "lenis";
 
 import "../css/globals.css";
 
@@ -19,6 +20,29 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
+  
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+      touchMultiplier: 2,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <SessionProvider session={session}>
       <Head>

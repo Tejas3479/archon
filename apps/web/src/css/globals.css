@@ -4,10 +4,27 @@
 
 /* ── Base resets ─────────────────────────────────── */
 html {
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth; -> Removed for Lenis */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Lenis recommended CSS */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 *, *::before, *::after {
@@ -17,25 +34,20 @@ html {
 /* ── Selection color ─────────────────────────────── */
 ::selection {
   background-color: rgba(99, 102, 241, 0.3);
-  color: #e8edf5;
+  color: #f8fafc;
 }
 
 /* ── Scrollbar ───────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #080c14; }
-::-webkit-scrollbar-thumb { background: #1e2a3d; border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: #2d3d54; }
+::-webkit-scrollbar-track { background: #05080f; }
+::-webkit-scrollbar-thumb { background: #121a2f; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #1e2a3d; }
 
 /* ── Focus ring ──────────────────────────────────── */
 :focus-visible {
   outline: 2px solid #6366f1;
   outline-offset: 3px;
   border-radius: 4px;
-}
-
-/* ── Gradients used in landing ───────────────────── */
-.bg-hero-radial {
-  background: radial-gradient(ellipse 90% 55% at 50% -5%, rgba(99, 102, 241, 0.18) 0%, transparent 70%);
 }
 
 /* ── White/8 border util (not in Tailwind by default) */
@@ -47,16 +59,6 @@ html {
 @keyframes shimmer-text {
   0%   { background-position: 0% 50%; }
   100% { background-position: 100% 50%; }
-}
-
-/* ── Float orb animation ─────────────────────────── */
-@keyframes float-orb {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50%       { transform: translateY(-18px) scale(1.04); }
-}
-
-.animate-float-slow {
-  animation: float-orb 9s ease-in-out infinite;
 }
 
 /* ── Prevent layout shift from fixed nav ─────────── */
