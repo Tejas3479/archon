@@ -3,7 +3,7 @@ use archon_core::voice::{VoiceProcessor, VoiceResult};
 #[test]
 fn test_voice_travel_intent_complete() {
     let mut processor = VoiceProcessor::new();
-    let result = processor.process_command("I want to travel to London").unwrap();
+    let result = processor.process_command("I want to travel to London tomorrow").unwrap();
     
     assert!(result.intent_detected);
     assert!(!result.clarification_needed);
@@ -13,6 +13,7 @@ fn test_voice_travel_intent_complete() {
     assert_eq!(intent["domain"], "travel");
     assert_eq!(intent["action"], "search_flights");
     assert_eq!(intent["parameters"]["destination"], "london");
+    assert_eq!(intent["parameters"]["departure_date"], "tomorrow");
 }
 
 
@@ -27,15 +28,24 @@ fn test_voice_travel_intent_clarification() {
     assert_eq!(processor.awaiting_parameter, Some("destination".to_string()));
 
     // 2nd turn: provide destination
-    let result2 = processor.process_command("Paris").unwrap();
-    assert!(result2.intent_detected);
-    assert!(!result2.clarification_needed);
-    assert!(result2.message.contains("travel search flights"));
+    let result2 = processor.process_command("I want to go to Paris").unwrap();
+    // In our new enhancement, it extracts 'paris' and then asks for the date
+    assert!(!result2.intent_detected);
+    assert!(result2.clarification_needed);
+    assert_eq!(result2.message, "When would you like to depart?");
+    assert_eq!(processor.awaiting_parameter, Some("departure_date".to_string()));
+
+    // 3rd turn: provide date
+    let result3 = processor.process_command("next week").unwrap();
+    assert!(result3.intent_detected);
+    assert!(!result3.clarification_needed);
+    assert!(result3.message.contains("travel search flights"));
     
-    let intent = result2.intent.unwrap();
+    let intent = result3.intent.unwrap();
     assert_eq!(intent["domain"], "travel");
     assert_eq!(intent["action"], "search_flights");
-    assert_eq!(intent["parameters"]["destination"], "Paris");
+    assert_eq!(intent["parameters"]["destination"], "paris");
+    assert_eq!(intent["parameters"]["departure_date"], "next week");
     assert!(processor.awaiting_parameter.is_none());
 }
 
@@ -53,10 +63,10 @@ fn test_voice_food_order_clarification() {
     let result2 = processor.process_command("Pizza Hut").unwrap();
     assert!(result2.intent_detected);
     assert!(!result2.clarification_needed);
-    assert!(result2.message.contains("social order dinner"));
+    assert!(result2.message.contains("food order dinner"));
     
     let intent = result2.intent.unwrap();
-    assert_eq!(intent["domain"], "social");
+    assert_eq!(intent["domain"], "food");
     assert_eq!(intent["action"], "order_dinner");
     assert_eq!(intent["parameters"]["restaurant"], "Pizza Hut");
 }
@@ -73,6 +83,23 @@ fn test_voice_smart_home_intents() {
     assert_eq!(intent["action"], "toggle_device");
     assert_eq!(intent["parameters"]["device"], "light");
     assert_eq!(intent["parameters"]["state"], "off");
+}
+
+#[test]
+fn test_voice_home_intent_clarification() {
+    let mut processor = VoiceProcessor::new();
+    // Missing device
+    let result1 = processor.process_command("turn that on").unwrap();
+    assert!(!result1.intent_detected);
+    assert!(result1.clarification_needed);
+    assert_eq!(result1.message, "Which device would you like to control?");
+    
+    // Provide device
+    let result2 = processor.process_command("the thermostat").unwrap();
+    assert!(result2.intent_detected);
+    let intent = result2.intent.unwrap();
+    assert_eq!(intent["parameters"]["device"], "thermostat");
+    assert_eq!(intent["parameters"]["state"], "on"); // Picked up from turn 1
 }
 
 #[test]

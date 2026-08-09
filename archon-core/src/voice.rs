@@ -93,7 +93,50 @@ impl VoiceProcessor {
         // 1. Check if we are currently awaiting a clarification parameter from previous turn
         if let Some(param) = &self.awaiting_parameter {
             let p_name = param.clone();
-            self.stored_params.insert(p_name, serde_json::json!(text.to_string()));
+            
+            // Extract entities rather than blinding trusting the response
+            let mut extracted = text.to_string();
+            if p_name == "destination" {
+                let destinations = vec!["new york", "london", "paris", "tokyo", "chicago", "san francisco", "berlin"];
+                for dest in destinations {
+                    if text_lower.contains(dest) {
+                        extracted = dest.to_string();
+                        break;
+                    }
+                }
+            } else if p_name == "departure_date" {
+                let dates = vec!["tomorrow", "today", "next week", "june 12", "2026-06-12"];
+                for d in dates {
+                    if text_lower.contains(d) {
+                        extracted = d.to_string();
+                        break;
+                    }
+                }
+            } else if p_name == "device" {
+                let devices = vec!["light", "thermostat", "door", "tv"];
+                for dev in devices {
+                    if text_lower.contains(dev) {
+                        extracted = dev.to_string();
+                        break;
+                    }
+                }
+            }
+            
+            self.stored_params.insert(p_name.clone(), serde_json::json!(extracted));
+            
+            // For travel, if we just got the destination, we might still need the date
+            if self.current_domain.as_deref() == Some("travel") {
+                if p_name == "destination" && !self.stored_params.contains_key("departure_date") {
+                    self.awaiting_parameter = Some("departure_date".to_string());
+                    return Ok(VoiceResult {
+                        intent_detected: false,
+                        clarification_needed: true,
+                        message: "When would you like to depart?".to_string(),
+                        intent: None,
+                    });
+                }
+            }
+
             self.awaiting_parameter = None;
 
             let domain = self.current_domain.take().unwrap_or_default();
@@ -191,22 +234,34 @@ impl VoiceProcessor {
                         break;
                     }
                 }
+                
+                let dates = vec!["tomorrow", "today", "next week", "june 12", "2026-06-12"];
+                let mut found_date = None;
+                for d in dates {
+                    if text_lower.contains(d) {
+                        found_date = Some(d.to_string());
+                        break;
+                    }
+                }
 
-                if let Some(dest) = found_dest {
+                if let (Some(dest), Some(date)) = (&found_dest, &found_date) {
                     return Ok(VoiceResult {
                         intent_detected: true,
                         clarification_needed: false,
-                        message: format!("Scheduling flight search to {}.", dest),
+                        message: format!("Scheduling flight search to {} for {}.", dest, date),
                         intent: Some(serde_json::json!({
                             "domain": "travel",
                             "action": "search_flights",
                             "parameters": {
                                 "destination": dest,
-                                "departure_date": "2026-06-12"
+                                "departure_date": date
                             }
                         })),
                     });
-                } else {
+                } else if found_dest.is_none() {
+                    if let Some(d) = found_date {
+                        self.stored_params.insert("departure_date".to_string(), serde_json::json!(d));
+                    }
                     self.awaiting_parameter = Some("destination".to_string());
                     self.current_domain = Some("travel".to_string());
                     self.current_action = Some("search_flights".to_string());
@@ -216,11 +271,25 @@ impl VoiceProcessor {
                         message: "What is your flight destination?".to_string(),
                         intent: None,
                     });
+                } else {
+                    // We have destination but no date
+                    if let Some(dest) = found_dest {
+                        self.stored_params.insert("destination".to_string(), serde_json::json!(dest));
+                    }
+                    self.awaiting_parameter = Some("departure_date".to_string());
+                    self.current_domain = Some("travel".to_string());
+                    self.current_action = Some("search_flights".to_string());
+                    return Ok(VoiceResult {
+                        intent_detected: false,
+                        clarification_needed: true,
+                        message: "When would you like to depart?".to_string(),
+                        intent: None,
+                    });
                 }
             },
             "food" => {
                 self.awaiting_parameter = Some("restaurant".to_string());
-                self.current_domain = Some("social".to_string());
+                self.current_domain = Some("food".to_string());
                 self.current_action = Some("order_dinner".to_string());
                 return Ok(VoiceResult {
                     intent_detected: false,
@@ -230,19 +299,50 @@ impl VoiceProcessor {
                 });
             },
             "home" => {
-                return Ok(VoiceResult {
-                    intent_detected: true,
-                    clarification_needed: false,
-                    message: "Updating smart home configurations.".to_string(),
-                    intent: Some(serde_json::json!({
-                        "domain": "home",
-                        "action": "toggle_device",
-                        "parameters": {
-                            "device": if text_lower.contains("light") { "light" } else { "thermostat" },
-                            "state": if text_lower.contains("off") { "off" } else { "on" }
-                        }
-                    })),
-                });
+                let devices = vec!["light", "thermostat", "door", "tv"];
+                let mut found_device = None;
+                for dev in devices {
+                    if text_lower.contains(dev) {
+                        found_device = Some(dev.to_string());
+                        break;
+                    }
+                }
+                
+                let states = vec!["on", "off", "open", "close", "lock", "unlock"];
+                let mut found_state = "on".to_string(); // fallback state
+                for st in states {
+                    if text_lower.contains(st) {
+                        found_state = st.to_string();
+                        break;
+                    }
+                }
+                
+                if let Some(dev) = found_device {
+                    return Ok(VoiceResult {
+                        intent_detected: true,
+                        clarification_needed: false,
+                        message: "Updating smart home configurations.".to_string(),
+                        intent: Some(serde_json::json!({
+                            "domain": "home",
+                            "action": "toggle_device",
+                            "parameters": {
+                                "device": dev,
+                                "state": found_state
+                            }
+                        })),
+                    });
+                } else {
+                    self.stored_params.insert("state".to_string(), serde_json::json!(found_state));
+                    self.awaiting_parameter = Some("device".to_string());
+                    self.current_domain = Some("home".to_string());
+                    self.current_action = Some("toggle_device".to_string());
+                    return Ok(VoiceResult {
+                        intent_detected: false,
+                        clarification_needed: true,
+                        message: "Which device would you like to control?".to_string(),
+                        intent: None,
+                    });
+                }
             },
             "finance" => {
                 return Ok(VoiceResult {
