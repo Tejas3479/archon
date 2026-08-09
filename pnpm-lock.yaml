@@ -203,25 +203,6 @@ importers:
         specifier: ^5.2.2
         version: 5.9.3
 
-  packages/mcp-server:
-    dependencies:
-      '@archon/core-shared':
-        specifier: workspace:*
-        version: link:../core-shared
-      hono:
-        specifier: ^4.4.2
-        version: 4.12.23
-    devDependencies:
-      '@types/node':
-        specifier: ^20.12.7
-        version: 20.19.42
-      typescript:
-        specifier: ^5.4.5
-        version: 5.9.3
-      vitest:
-        specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.42)(jsdom@20.0.3)(lightningcss@1.27.0)(terser@5.48.0)
-
   packages/skill-marketplace:
     dependencies:
       hono:
