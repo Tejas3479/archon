@@ -45,6 +45,11 @@ export const orgManagementTools = {
     return true;
   },
 
+  async updateMemberRole(db: any, orgId: string, userId: string, role: "owner" | "admin" | "member" | "viewer"): Promise<boolean> {
+    await db.prepare("UPDATE team_members SET role = ? WHERE organization_id = ? AND user_id = ?").bind(role, orgId, userId).run();
+    return true;
+  },
+
   async getMembers(db: any, orgId: string): Promise<TeamMember[]> {
     const { results } = await db.prepare("SELECT user_id as userId, role FROM team_members WHERE organization_id = ?").bind(orgId).all();
     

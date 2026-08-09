@@ -21,7 +21,8 @@ import {
   sandboxReviewSchema,
   writeCodeSchema,
   orgCreateSchema,
-  orgInviteSchema
+  orgInviteSchema,
+  orgRoleUpdateSchema
 } from "./middleware/input_validation.js";
 
 // Re-export Durable Objects so wrangler registers them
@@ -61,6 +62,7 @@ app.post("/sandbox/review", validateBody(sandboxReviewSchema));
 app.post("/tools/developer.write_code", validateBody(writeCodeSchema));
 app.post("/org/create", validateBody(orgCreateSchema));
 app.post("/org/:orgId/invite", validateBody(orgInviteSchema));
+app.put("/org/:orgId/member/:userId", validateBody(orgRoleUpdateSchema));
 
 // Exposes public MCP tool manifests for client discoverability
 app.get("/.well-known/mcp", (c) => {
@@ -300,6 +302,18 @@ app.delete("/org/:orgId/member/:userId", async (c) => {
     const orgId = c.req.param("orgId");
     const userId = c.req.param("userId");
     const success = await orgManagementTools.removeMember(c.env.DB, orgId, userId);
+    return c.json({ success });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+app.put("/org/:orgId/member/:userId", async (c) => {
+  try {
+    const orgId = c.req.param("orgId");
+    const userId = c.req.param("userId");
+    const { role } = c.get("validBody") as { role: any };
+    const success = await orgManagementTools.updateMemberRole(c.env.DB, orgId, userId, role);
     return c.json({ success });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);

@@ -45,7 +45,11 @@ export const orgCreateSchema = z.object({
 
 export const orgInviteSchema = z.object({
   email: z.string().email(),
-  role: z.preprocess((val) => typeof val === "string" ? val.toUpperCase() : val, z.enum(["ADMIN", "MEMBER", "VIEWER"]))
+  role: z.preprocess((val) => typeof val === "string" ? val.toLowerCase() : val, z.enum(["admin", "member", "viewer", "owner"]))
+});
+
+export const orgRoleUpdateSchema = z.object({
+  role: z.preprocess((val) => typeof val === "string" ? val.toLowerCase() : val, z.enum(["admin", "member", "viewer", "owner"]))
 });
 
 export function validateBody<T extends z.ZodTypeAny>(schema: T) {
