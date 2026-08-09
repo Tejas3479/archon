@@ -25,12 +25,12 @@ Archon is built on a bleeding-edge stack utilizing edge computing and on-device 
 
 ```mermaid
 graph TD
-    subgraph Client Layer
+    subgraph ClientLayer [Client Layer]
         Mobile[React Native iOS App]
         Web[Next.js Admin Dashboard]
     end
 
-    subgraph Enclave Sandbox (Zero-Cloud)
+    subgraph EnclaveSandbox [Enclave Sandbox Zero-Cloud]
         Core[Archon Core WASM]
         Rust[Rust Neural Engine]
         Vault[AES-256-GCM Memory Vault]
@@ -38,7 +38,7 @@ graph TD
         Rust <--> Vault
     end
 
-    subgraph Cloud Edge
+    subgraph CloudEdge [Cloud Edge]
         Gateway[Cloudflare Worker Gateway]
         D1[(D1 SQLite)]
         KV[(KV Store)]
