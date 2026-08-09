@@ -183,7 +183,7 @@ export const teamMembersAtom = atom<TeamMember[]>([
   { userId: "user_admin", role: "admin" },
   { userId: "user_member_1", role: "member" }
 ]);
-export const ssoTokenAtom = atom<string | null>("archon_demo_secret_2026");
+export const ssoTokenAtom = atom<string | null>(null);
 
 
 
