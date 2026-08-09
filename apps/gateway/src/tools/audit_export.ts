@@ -65,7 +65,7 @@ export const auditExportTools = {
 
     const csvContent = [
       headers.join(","),
-      ...rows.map(r => r.join(","))
+      ...rows.map((r: any[]) => r.join(","))
     ].join("\n");
 
     return csvContent;

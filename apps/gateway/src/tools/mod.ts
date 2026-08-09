@@ -83,7 +83,7 @@ export const gatewayTools = {
       return orgManagementTools.handle(toolName, args, db);
     }
     if (toolName.startsWith("audit.")) {
-      return auditExportTools.handle(toolName, args);
+      return auditExportTools.handle(toolName, args, db);
     }
     throw new Error(`Tool catalog entry not found: ${toolName}`);
   }
