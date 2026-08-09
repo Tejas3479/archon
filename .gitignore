@@ -55,3 +55,6 @@ packages/db/dev.db-journal
 *.sln
 *.sw?
 Thumbs.db
+
+# Hackforge
+.hackforge/
