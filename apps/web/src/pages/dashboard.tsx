@@ -39,8 +39,8 @@ export default function DashboardPage() {
   useEffect(() => {
     async function getGatewayStats() {
       try {
-        const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8787";
-        const API_KEY = process.env.NEXT_PUBLIC_GATEWAY_API_KEY || "archon_demo_secret_2026";
+        const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL as string;
+        const API_KEY = process.env.NEXT_PUBLIC_GATEWAY_API_KEY as string;
         const res = await fetch(`${GATEWAY_URL}/org/org_123/stats`, {
           headers: { "Authorization": `Bearer ${API_KEY}` }
         });
