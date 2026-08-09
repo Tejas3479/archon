@@ -53,7 +53,7 @@ export const auditExportTools = {
       "SELECT id, user_id, action, details, created_at FROM audit_logs WHERE organization_id = ? ORDER BY created_at DESC"
     ).bind(orgId).all();
 
-    const logs = results || mockAuditLogs;
+    const logs = results && results.length > 0 ? results : mockAuditLogs;
 
     const rows = logs.map((log: any) => [
       log.id,
