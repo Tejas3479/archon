@@ -1,3 +1,63 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Base resets ─────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ── Selection color ─────────────────────────────── */
+::selection {
+  background-color: rgba(99, 102, 241, 0.3);
+  color: #e8edf5;
+}
+
+/* ── Scrollbar ───────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #080c14; }
+::-webkit-scrollbar-thumb { background: #1e2a3d; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #2d3d54; }
+
+/* ── Focus ring ──────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Gradients used in landing ───────────────────── */
+.bg-hero-radial {
+  background: radial-gradient(ellipse 90% 55% at 50% -5%, rgba(99, 102, 241, 0.18) 0%, transparent 70%);
+}
+
+/* ── White/8 border util (not in Tailwind by default) */
+.border-white\/8 {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Shimmer text gradient ───────────────────────── */
+@keyframes shimmer-text {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* ── Float orb animation ─────────────────────────── */
+@keyframes float-orb {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(-18px) scale(1.04); }
+}
+
+.animate-float-slow {
+  animation: float-orb 9s ease-in-out infinite;
+}
+
+/* ── Prevent layout shift from fixed nav ─────────── */
+body { padding-top: 0; }

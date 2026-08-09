@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Layout from "../components/Layout";
+import toast from "react-hot-toast";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -49,7 +51,7 @@ export default function DashboardPage() {
           setStats(data);
         }
       } catch (err) {
-        // Fallback to local default stats if gateway is offline
+        toast.error("Could not reach gateway — showing cached data.");
       }
     }
     getGatewayStats();
@@ -70,6 +72,11 @@ export default function DashboardPage() {
   }
 
   return (
+    <>
+      <Head>
+        <title>Overview — Archon Enterprise</title>
+        <meta name="description" content="Organisation overview and activity dashboard." />
+      </Head>
     <Layout>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-text-primary tracking-tight">Organization Overview</h1>
@@ -119,5 +126,6 @@ export default function DashboardPage() {
         </div>
       </div>
     </Layout>
+    </>
   );
 }

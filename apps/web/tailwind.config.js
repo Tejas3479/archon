@@ -36,7 +36,26 @@ module.exports = {
       },
       backgroundImage: {
         'glass': 'linear-gradient(to bottom right, rgba(14,22,35,0.8), rgba(14,22,35,0.4))',
-      }
+      },
+      keyframes: {
+        fadeIn: {
+          from: { opacity: 0 },
+          to: { opacity: 1 },
+        },
+        slideUp: {
+          from: { transform: 'translateY(20px)', opacity: 0 },
+          to: { transform: 'translateY(0)', opacity: 1 },
+        },
+        glow: {
+          '0%, 100%': { opacity: 0.5 },
+          '50%': { opacity: 1 },
+        },
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.5s ease-out forwards',
+        slideUp: 'slideUp 0.8s ease-out forwards',
+        glow: 'glow 3s ease-in-out infinite',
+      },
     },
   },
   plugins: [],

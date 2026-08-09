@@ -1,12 +1,13 @@
 import React, { useState } from "react";
+import Head from "next/head";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import { Shield } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@company.com");
-  const [password, setPassword] = useState("password");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -30,6 +31,11 @@ export default function LoginPage() {
   };
 
   return (
+    <>
+    <Head>
+      <title>Sign In — Archon Enterprise Portal</title>
+      <meta name="description" content="Sign in to the Archon Enterprise Dashboard." />
+    </Head>
     <div className="min-h-screen bg-bg-primary text-text-primary flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-glass backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.3)] shadow-accent-glow">
         <div className="text-center mb-8 flex flex-col items-center">
@@ -51,8 +57,11 @@ export default function LoginPage() {
             <label className="block text-xs font-semibold uppercase text-text-secondary mb-2 tracking-wide">Company Email</label>
             <input
               type="email"
+              id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@company.com"
+              aria-label="Company email address"
               className="w-full bg-bg-elevated border border-white/10 rounded-lg p-3 text-text-primary text-sm focus:outline-none focus:border-accent-primary focus:ring-2 focus:ring-accent-glow transition-all"
               required
             />
@@ -62,8 +71,11 @@ export default function LoginPage() {
             <label className="block text-xs font-semibold uppercase text-text-secondary mb-2 tracking-wide">SSO Password</label>
             <input
               type="password"
+              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              aria-label="SSO password"
               className="w-full bg-bg-elevated border border-white/10 rounded-lg p-3 text-text-primary text-sm focus:outline-none focus:border-accent-primary focus:ring-2 focus:ring-accent-glow transition-all"
               required
             />
@@ -88,5 +100,6 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
