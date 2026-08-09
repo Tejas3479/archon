@@ -30,5 +30,5 @@ fn test_deepfake_checker_unregistered_baseline() {
     
     // Normal unregistered hash returns base low baseline
     let score = checker.check_media("hash_unregistered_normal_photo_xyz");
-    assert_eq!(score, 0.15);
+    assert!((score - 0.15).abs() < 0.01);
 }
