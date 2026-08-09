@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Layout from "../components/Layout";
 import { Download } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface AuditRecord {
   id: string;
@@ -17,6 +18,7 @@ export default function AuditPage() {
   const router = useRouter();
 
   const [logs, setLogs] = useState<AuditRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchLogs() {
@@ -29,9 +31,14 @@ export default function AuditPage() {
         if (res.ok) {
           const data = await res.json();
           setLogs(data.audit_logs || []);
+        } else {
+          toast.error("Failed to load audit logs");
         }
       } catch (err) {
         console.error("Failed to fetch audit logs", err);
+        toast.error("Gateway connection error");
+      } finally {
+        setIsLoading(false);
       }
     }
     if (status === "authenticated") {
@@ -62,9 +69,13 @@ export default function AuditPage() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        toast.success("Audit report downloaded successfully.");
+      } else {
+        toast.error("Failed to generate CSV report");
       }
     } catch (err) {
       console.error("Failed to download CSV", err);
+      toast.error("Failed to download report");
     }
   };
 
@@ -116,15 +127,31 @@ export default function AuditPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredLogs.map((log) => (
-              <tr key={log.id} className="border-b border-white/5 hover:bg-white/5 transition-colors duration-100">
-                <td className="p-4 text-xs font-mono text-accent-secondary">{log.id}</td>
-                <td className="p-4 text-sm font-semibold font-mono text-text-primary">{log.userId}</td>
-                <td className="p-4 text-xs font-bold uppercase text-text-secondary">{log.action}</td>
-                <td className="p-4 text-sm text-text-secondary">{log.details}</td>
-                <td className="p-4 text-xs text-text-muted font-mono">{log.createdAt}</td>
+            {isLoading ? (
+              [1, 2, 3, 4, 5].map((i) => (
+                <tr key={i} className="border-b border-white/5">
+                  <td className="p-4"><div className="h-4 w-20 bg-bg-elevated animate-pulse rounded"></div></td>
+                  <td className="p-4"><div className="h-4 w-32 bg-bg-elevated animate-pulse rounded"></div></td>
+                  <td className="p-4"><div className="h-4 w-16 bg-bg-elevated animate-pulse rounded"></div></td>
+                  <td className="p-4"><div className="h-4 w-64 bg-bg-elevated animate-pulse rounded"></div></td>
+                  <td className="p-4"><div className="h-4 w-32 bg-bg-elevated animate-pulse rounded"></div></td>
+                </tr>
+              ))
+            ) : filteredLogs.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-text-secondary text-sm font-mono">No audit logs found.</td>
               </tr>
-            ))}
+            ) : (
+              filteredLogs.map((log) => (
+                <tr key={log.id} className="border-b border-white/5 hover:bg-white/5 transition-colors duration-100">
+                  <td className="p-4 text-xs font-mono text-accent-secondary">{log.id}</td>
+                  <td className="p-4 text-sm font-semibold font-mono text-text-primary">{log.userId}</td>
+                  <td className="p-4 text-xs font-bold uppercase text-text-secondary">{log.action}</td>
+                  <td className="p-4 text-sm text-text-secondary">{log.details}</td>
+                  <td className="p-4 text-xs text-text-muted font-mono">{log.createdAt}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

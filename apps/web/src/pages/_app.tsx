@@ -2,6 +2,7 @@ import React from "react";
 import type { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 
 import "../css/globals.css";
 
@@ -20,6 +21,14 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
     <SessionProvider session={session}>
       <main className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans`}>
         <Component {...pageProps} />
+        <Toaster 
+          position="bottom-right" 
+          toastOptions={{ 
+            className: "!bg-bg-elevated !text-text-primary border border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.3)] !font-mono !text-xs",
+            success: { iconTheme: { primary: '#10b981', secondary: '#141e2e' } },
+            error: { iconTheme: { primary: '#ef4444', secondary: '#141e2e' } }
+          }} 
+        />
       </main>
     </SessionProvider>
   );

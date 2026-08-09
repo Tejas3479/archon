@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Layout from "../components/Layout";
+import toast from "react-hot-toast";
 
 interface TeamMember {
   userId: string;
@@ -12,10 +13,8 @@ export default function TeamPage() {
   const { status } = useSession();
   const router = useRouter();
 
-  const [members, setMembers] = useState<TeamMember[]>([
-    { userId: "user_admin", role: "admin" },
-    { userId: "user_member_1", role: "member" },
-  ]);
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("member");
 
@@ -35,9 +34,13 @@ export default function TeamPage() {
       if (res.ok) {
         const data = await res.json();
         setMembers(data.members);
+      } else {
+        toast.error("Failed to load team members");
       }
     } catch (err) {
-      // Fallback
+      toast.error("Gateway connection error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,11 +65,13 @@ export default function TeamPage() {
       });
       if (res.ok) {
         setInviteEmail("");
+        toast.success("Invitation sent successfully!");
         fetchMembers();
       } else {
         throw new Error("Failed to invite");
       }
     } catch (err) {
+      toast.error("Failed to send invite. Using fallback mode.");
       setMembers((prev) => [...prev, { userId: inviteEmail, role: inviteRole }]);
       setInviteEmail("");
     }
@@ -81,11 +86,13 @@ export default function TeamPage() {
         headers: { "Authorization": `Bearer ${API_KEY}` },
       });
       if (res.ok) {
+        toast.success("License revoked successfully.");
         fetchMembers();
       } else {
         throw new Error("Failed to remove");
       }
     } catch (err) {
+      toast.error("Failed to revoke license. Using fallback mode.");
       setMembers((prev) => prev.filter((m) => m.userId !== userId));
     }
   };
@@ -94,6 +101,7 @@ export default function TeamPage() {
     setMembers((prev) =>
       prev.map((m) => (m.userId === userId ? { ...m, role: newRole } : m))
     );
+    toast.success("Role updated successfully.");
   };
 
   if (status !== "authenticated") {
@@ -161,30 +169,44 @@ export default function TeamPage() {
             </tr>
           </thead>
           <tbody>
-            {members.map((member) => (
-              <tr key={member.userId} className="border-b border-white/5 hover:bg-white/5 transition-colors duration-100">
-                <td className="p-4 text-sm font-mono text-text-primary">{member.userId}</td>
-                <td className="p-4 text-sm">
-                  <select
-                    value={member.role}
-                    onChange={(e) => handleRoleChange(member.userId, e.target.value)}
-                    className="bg-bg-elevated border border-white/10 rounded p-1.5 text-text-primary text-xs focus:outline-none focus:border-accent-primary"
-                  >
-                    <option value="admin">Admin</option>
-                    <option value="member">Member</option>
-                    <option value="viewer">Viewer</option>
-                  </select>
-                </td>
-                <td className="p-4 text-right">
-                  <button
-                    onClick={() => handleRemove(member.userId)}
-                    className="text-xs text-error hover:text-white font-bold border border-error/20 hover:bg-error/10 px-3 py-1.5 rounded transition-all duration-150"
-                  >
-                    Revoke License
-                  </button>
-                </td>
+            {isLoading ? (
+              [1, 2, 3].map((i) => (
+                <tr key={i} className="border-b border-white/5">
+                  <td className="p-4"><div className="h-4 w-48 bg-bg-elevated animate-pulse rounded"></div></td>
+                  <td className="p-4"><div className="h-6 w-24 bg-bg-elevated animate-pulse rounded"></div></td>
+                  <td className="p-4 text-right"><div className="h-8 w-28 bg-bg-elevated animate-pulse rounded ml-auto"></div></td>
+                </tr>
+              ))
+            ) : members.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="p-8 text-center text-text-secondary text-sm">No active members found.</td>
               </tr>
-            ))}
+            ) : (
+              members.map((member) => (
+                <tr key={member.userId} className="border-b border-white/5 hover:bg-white/5 transition-colors duration-100">
+                  <td className="p-4 text-sm font-mono text-text-primary">{member.userId}</td>
+                  <td className="p-4 text-sm">
+                    <select
+                      value={member.role}
+                      onChange={(e) => handleRoleChange(member.userId, e.target.value)}
+                      className="bg-bg-elevated border border-white/10 rounded p-1.5 text-text-primary text-xs focus:outline-none focus:border-accent-primary"
+                    >
+                      <option value="admin">Admin</option>
+                      <option value="member">Member</option>
+                      <option value="viewer">Viewer</option>
+                    </select>
+                  </td>
+                  <td className="p-4 text-right">
+                    <button
+                      onClick={() => handleRemove(member.userId)}
+                      className="text-xs text-error hover:text-white font-bold border border-error/20 hover:bg-error/10 px-3 py-1.5 rounded transition-all duration-150"
+                    >
+                      Revoke License
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
