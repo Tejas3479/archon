@@ -134,7 +134,7 @@ impl VoiceProcessor {
             return Ok(VoiceResult {
                 intent_detected: false,
                 clarification_needed: false,
-                message: "I couldn't derive the semantic meaning of that. Could you rephrase?".to_string(),
+                message: "I couldn't derive the semantic meaning of that. Could you clarify?".to_string(),
                 intent: None,
             });
         }
@@ -175,7 +175,7 @@ impl VoiceProcessor {
             return Ok(VoiceResult {
                 intent_detected: false,
                 clarification_needed: false,
-                message: "I'm not confident about what you want to do. Could you rephrase?".to_string(),
+                message: "I'm not confident about what you want to do. Could you clarify?".to_string(),
                 intent: None,
             });
         }

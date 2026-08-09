@@ -87,7 +87,9 @@ const createMockEnv = () => {
     access_tokens: new Map<string, any>(),
     cost_ledger: [] as any[],
     swarm_messages: new Map<string, any>(),
-    key_history: [] as any[]
+    key_history: [] as any[],
+    organizations: new Map<string, any>(),
+    team_members: [] as any[]
   };
 
   const DB = {
@@ -152,6 +154,15 @@ const createMockEnv = () => {
                   signing_key,
                   created_at: new Date().toISOString()
                 });
+              } else if (cleaned.startsWith("INSERT INTO organizations")) {
+                const [id, name, plan] = args;
+                dbData.organizations.set(id, { id, name, plan });
+              } else if (cleaned.startsWith("INSERT INTO team_members")) {
+                const [organization_id, user_id, role] = args;
+                dbData.team_members.push({ organization_id, user_id, role });
+              } else if (cleaned.startsWith("DELETE FROM team_members")) {
+                const [organization_id, user_id] = args;
+                dbData.team_members = dbData.team_members.filter(m => !(m.organization_id === organization_id && m.user_id === user_id));
               }
               return { success: true };
             },
@@ -184,6 +195,12 @@ const createMockEnv = () => {
                 return { results };
               } else if (cleaned.startsWith("SELECT * FROM key_history")) {
                 return { results: [...dbData.key_history].reverse() };
+              } else if (cleaned.startsWith("SELECT user_id as userId, role FROM team_members")) {
+                const [organization_id] = args;
+                const results = dbData.team_members
+                  .filter(m => m.organization_id === organization_id)
+                  .map(m => ({ userId: m.user_id, role: m.role }));
+                return { results };
               }
               return { results: [] };
             }
@@ -812,7 +829,7 @@ describe("Gateway API Router", () => {
   });
 
   it("performs org CRUD and stats collection under SSO", async () => {
-    const ssoHeader = { "Authorization": "Bearer valid_jwt_token_123", "Content-Type": "application/json" };
+    const ssoHeader = { "Authorization": "Bearer archon_demo_secret_2026", "Content-Type": "application/json" };
 
     // 1. Create Organization
     const createRes = await app.request(
@@ -901,7 +918,7 @@ describe("Gateway API Router", () => {
       "/org/org_123/audit?format=csv",
       {
         method: "GET",
-        headers: { "Authorization": "Bearer token123" }
+        headers: { "Authorization": "Bearer archon_demo_secret_2026" }
       },
       env
     );
