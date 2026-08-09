@@ -1,0 +1,23 @@
+{
+  "id": "architecture",
+  "title": "Archon Secure Enclave Architecture",
+  "description": "Archon is engineered as a secure, decentralized digital twin running inside localized secure enclaves (on-device Wasm sandboxes) that coordinate with enterprise systems using Cloudflare Worker gateways.",
+  "source": "@site/docs/architecture.md",
+  "sourceDirName": ".",
+  "slug": "/architecture",
+  "permalink": "/architecture",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Archon Documentation",
+    "permalink": "/"
+  },
+  "next": {
+    "title": "Archon Setup Guide",
+    "permalink": "/setup"
+  }
+}

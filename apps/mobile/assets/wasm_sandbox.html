@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Archon Core Wasm Sandbox</title>
+  <style>
+    body {
+      background-color: #0b0f19;
+      color: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #status {
+      font-size: 16px;
+      font-weight: 500;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div id="status">Initializing Archon Core...</div>
+
+  <script type="module">
+    // WHY: Wasm-bindgen bindings are imported locally.
+    // In React Native, the entire assets/pkg directory is bundled together.
+    import init, {
+      generate_identity,
+      encrypt_memory,
+      decrypt_memory,
+      process_event,
+      init as rust_init,
+      anneal_analyze,
+      apply_delta,
+      get_preference,
+      update_preference,
+      init_attention_model,
+      predict_attention,
+      sandbox_run,
+      swarm_send_message,
+      swarm_receive_message,
+      swarm_authorize_peer,
+      swarm_check_peer_authorized,
+      swarm_get_public_key,
+      issue_credential,
+      verify_credential,
+      create_presentation,
+      verify_presentation,
+      process_domain_intent,
+      process_voice_command,
+      get_spatial_scene,
+      trigger_reflection,
+      travel_agent_process_intent,
+      rsi_run,
+      defi_get_balance,
+      defi_suggest_swap,
+      deepfake_check,
+      gdpr_wipe,
+      fhe_encrypt_embedding,
+      fhe_decrypt_result,
+      dev_agent_request
+    } from './pkg/archon_core.js';
+
+    // WHY: Exposes a secure random generator that can be invoked synchronously by Rust.
+    // Since browser SubtleCrypto is present, we leverage crypto.getRandomValues directly.
+    window.generate_secure_random = function(len) {
+      const bytes = new Uint8Array(len);
+      window.crypto.getRandomValues(bytes);
+      return Array.from(bytes);
+    };
+
+    async function start() {
+      const statusEl = document.getElementById('status');
+      try {
+        await init('./pkg/archon_core_bg.wasm');
+        const res = rust_init();
+        
+        statusEl.innerText = 'Archon Core Secure Enclave Active';
+        
+        // Notify React Native WebView listener that the Wasm runtime is ready
+        window.ReactNativeWebView.postMessage(JSON.stringify({ event: 'ready' }));
+      } catch (err) {
+        statusEl.innerText = 'Initialization Failed';
+        window.ReactNativeWebView.postMessage(JSON.stringify({ event: 'error', error: err.toString() }));
+      }
+    }
+
+    // WHY: Listener that handles command payloads routed from the React Native application thread
+    window.addEventListener('message', async (event) => {
+      let msgId;
+      try {
+        const data = JSON.parse(event.data);
+        msgId = data.id;
+        const { action, payload } = data;
+        
+        let result;
+        if (action === 'init') {
+          result = "ready";
+        } else if (action === 'generateKeys') {
+          result = generate_identity();
+        } else if (action === 'encrypt') {
+          const bytes = encrypt_memory(payload);
+          result = Array.from(bytes);
+        } else if (action === 'decrypt') {
+          const bytes = new Uint8Array(payload);
+          result = decrypt_memory(bytes);
+        } else if (action === 'processEvent') {
+          // payload is event JSON string
+          result = process_event(payload);
+        } else if (action === 'annealAnalyze') {
+          result = anneal_analyze(payload);
+        } else if (action === 'applyDelta') {
+          result = apply_delta(payload);
+        } else if (action === 'getPreference') {
+          result = get_preference(payload);
+        } else if (action === 'updatePreference') {
+          update_preference(payload.key, payload.delta);
+          result = true;
+        } else if (action === 'initAttentionModel') {
+          init_attention_model(payload);
+          result = true;
+        } else if (action === 'predictAttention') {
+          result = predict_attention(payload);
+        } else if (action === 'sandboxRun') {
+          const bytes = new Uint8Array(payload.wasm_bytes);
+          result = sandbox_run(bytes, payload.input_json);
+        } else if (action === 'swarmSendMessage') {
+          result = swarm_send_message(payload.peerPubkeyHex, payload.payloadJson);
+        } else if (action === 'swarmReceiveMessage') {
+          result = swarm_receive_message(payload.peerPubkeyHex, payload.ciphertextHex);
+        } else if (action === 'swarmAuthorizePeer') {
+          swarm_authorize_peer(payload.peerPubkeyHex, payload.scope);
+          result = true;
+        } else if (action === 'swarmCheckPeerAuthorized') {
+          result = swarm_check_peer_authorized(payload.peerPubkeyHex, payload.scope);
+        } else if (action === 'swarmGetPublicKey') {
+          result = swarm_get_public_key();
+        } else if (action === 'issueCredential') {
+          result = issue_credential(payload.id, payload.subjectPubkeyHex, payload.claimsJson);
+        } else if (action === 'verifyCredential') {
+          result = verify_credential(payload.credentialJson, payload.issuerPubkeyHex);
+        } else if (action === 'createPresentation') {
+          result = create_presentation(payload.credentialsJson, payload.subjectPubkeyHex);
+        } else if (action === 'verifyPresentation') {
+          result = verify_presentation(payload.presentationJson, payload.subjectPubkeyHex);
+        } else if (action === 'processDomainIntent') {
+          result = process_domain_intent(payload.domain, payload.action, payload.jsonVariables);
+        } else if (action === 'processVoice') {
+          result = process_voice_command(payload);
+        } else if (action === 'getSpatialScene') {
+          result = get_spatial_scene();
+        } else if (action === 'triggerReflection') {
+          result = trigger_reflection();
+        } else if (action === 'travelProcessIntent') {
+          result = travel_agent_process_intent(payload);
+        } else if (action === 'rsiRun') {
+          result = rsi_run(payload.jsonFailures, new Uint8Array(payload.wasmBytes));
+        } else if (action === 'defiGetBalance') {
+          result = defi_get_balance();
+        } else if (action === 'defiSuggestSwap') {
+          result = defi_suggest_swap(payload.from, payload.to, payload.amount);
+        } else if (action === 'deepfakeCheck') {
+          result = deepfake_check(payload);
+        } else if (action === 'gdprWipe') {
+          result = gdpr_wipe(payload);
+        } else if (action === 'fheEncryptEmbedding') {
+          const enc = fhe_encrypt_embedding(new Float64Array(payload));
+          result = Array.from(enc);
+        } else if (action === 'fheDecryptResult') {
+          const dec = fhe_decrypt_result(new Uint8Array(payload));
+          result = Array.from(dec);
+        } else if (action === 'devAgentRequest') {
+          const taskObj = {
+            target_language: payload.targetLanguage,
+            description: payload.description,
+            failure_context: payload.failureContext
+          };
+          result = dev_agent_request(JSON.stringify(taskObj));
+        } else {
+          throw new Error('Unsupported bridge action: ' + action);
+        }
+
+        window.ReactNativeWebView.postMessage(JSON.stringify({ id: msgId, event: 'response', result }));
+      } catch (err) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ id: msgId, event: 'error', error: err.toString() }));
+      }
+    });
+
+    start();
+  </script>
+</body>
+</html>

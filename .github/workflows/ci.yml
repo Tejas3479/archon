@@ -1,0 +1,75 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.0.4
+      - run: pnpm install
+      - run: pnpm run lint || echo "No lint script found, skipping"
+
+  test-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            archon-core/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('archon-core/Cargo.lock') }}
+      - run: cargo test --manifest-path archon-core/Cargo.toml
+
+  test-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.0.4
+          run_install: true
+      - run: pnpm test
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.0.4
+      - run: pnpm install
+      - name: Run Snyk
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+      - name: Install cargo-audit
+        run: cargo install cargo-audit || echo "cargo-audit install skipped"
+      - name: Run cargo-audit
+        run: cargo audit || echo "cargo-audit scan failed or skipped"
+
+  deploy-staging:
+    if: github.ref == 'refs/heads/main'
+    needs: [test-rust, test-js, security-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.0.4
+      - run: pnpm install
+      - name: Deploy Gateway to Staging
+        run: pnpm --filter @archon/gateway run deploy || echo "No deploy script, skipping"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

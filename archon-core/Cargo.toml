@@ -1,0 +1,44 @@
+[package]
+name = "archon-core"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = "0.2.90"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.115"
+uuid = { version = "1.8.0", features = ["v4", "js"] }
+zeroize = { version = "1.7.0", features = ["derive"] }
+rand = "0.8.5"
+getrandom = { version = "0.2.12", features = ["js"] }
+wasm-bindgen-futures = "0.4.40"
+tracing = "0.1.40"
+tracing-wasm = "0.2.1"
+aes-gcm = "0.10.3"
+sha3 = "0.10.8"
+ed25519-dalek = { version = "2.1.1", features = ["rand_core", "serde"] }
+petgraph = "0.6.4"
+serde-wasm-bindgen = "0.6.4"
+wasmi = "0.32.0"
+ron = "0.8.1"
+serde_yaml = "0.9.34"
+regex = "1.10.4"
+thiserror = "2.0.3"
+x25519-dalek = { version = "2.0.1", features = ["static_secrets"] }
+hkdf = "0.12.4"
+sha2 = "0.10.8"
+chrono = { version = "0.4.38", features = ["serde"] }
+serde_bytes = "0.11.14"
+nalgebra = "0.33"
+primitive-types = { version = "0.12.2" }
+liboqs = { path = "../packages/liboqs", version = "0.10.2", optional = true }
+ethers = { version = "2.0.14", optional = true, default-features = false, features = ["abigen"] }
+
+[features]
+pqc = ["dep:liboqs"]
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.40"

@@ -1,0 +1,35 @@
+name = "archon-gateway"
+main = "src/index.ts"
+compatibility_date = "2025-06-01"
+
+[vars]
+TOKEN_SIGNING_KEY = "fallback-key"
+
+kv_namespaces = [
+  { binding = "PUBLIC_KEYS", id = "PUBLIC_KEYS_DEV_ID" }
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "archon-db"
+database_id = "placeholder-d1-id"
+
+[[durable_objects.bindings]]
+name = "TOKEN_MANAGER"
+class_name = "TokenManager"
+
+[[durable_objects.bindings]]
+name = "COST_LEDGER"
+class_name = "CostLedger"
+
+[[durable_objects.bindings]]
+name = "SWARM_RELAY"
+class_name = "SwarmRelay"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["TokenManager", "CostLedger"]
+
+[[migrations]]
+tag = "v2"
+new_classes = ["SwarmRelay"]

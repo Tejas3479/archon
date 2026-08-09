@@ -1,0 +1,19 @@
+{
+  "id": "index",
+  "title": "Archon Documentation",
+  "description": "Welcome to the Archon Documentation. Archon is a secure, decentralized digital twin running inside localized secure enclaves.",
+  "source": "@site/docs/index.md",
+  "sourceDirName": ".",
+  "slug": "/",
+  "permalink": "/",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "next": {
+    "title": "Archon Secure Enclave Architecture",
+    "permalink": "/architecture"
+  }
+}

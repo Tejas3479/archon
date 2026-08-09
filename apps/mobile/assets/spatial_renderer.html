@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archon Spatial View Renderer</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #0b1120 0%, #030712 100%);
+      color: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    #ui-overlay {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .widget-card {
+      background: rgba(17, 24, 39, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px 18px;
+      max-width: 280px;
+      pointer-events: auto;
+      transform: translateY(0);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.5s ease-out;
+    }
+    .widget-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #60a5fa;
+      margin: 0 0 4px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .widget-detail {
+      font-size: 13px;
+      color: #d1d5db;
+      margin: 0;
+      line-height: 1.4;
+    }
+    #debug-info {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      z-index: 10;
+      pointer-events: none;
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+  <!-- Load Three.js from unpkg CDN -->
+  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div id="ui-overlay"></div>
+  <div id="debug-info">Gyroscope inactive (Orbit Mode active)</div>
+
+  <script>
+    let scene, camera, renderer, orb, glow;
+    let pulseRate = 1.0;
+    let targetPulseRate = 1.0;
+    let baseColor = new THREE.Color("#10b981");
+    let targetColor = new THREE.Color("#10b981");
+    let clock = new THREE.Clock();
+
+    // Gyroscope tracking vars
+    let gyro = { alpha: 0, beta: 0, gamma: 0 };
+    let hasGyro = false;
+
+    function init() {
+      const container = document.getElementById('canvas-container');
+      
+      // 1. Create Scene
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x030712, 0.015);
+
+      // 2. Create Camera
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 5;
+
+      // 3. Create Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      container.appendChild(renderer.domElement);
+
+      // 4. Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+      scene.add(ambientLight);
+
+      const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight1.position.set(5, 10, 7);
+      scene.add(dirLight1);
+
+      const pointLight = new THREE.PointLight(0x3b82f6, 2, 20);
+      pointLight.position.set(0, 0, 0);
+      scene.add(pointLight);
+
+      // 5. Creating glowing pulsing orb
+      // Core sphere
+      const geometry = new THREE.SphereGeometry(1.2, 64, 64);
+      const material = new THREE.MeshStandardMaterial({
+        color: baseColor,
+        roughness: 0.1,
+        metalness: 0.9,
+        flatShading: false,
+        bumpScale: 0.05,
+      });
+      orb = new THREE.Mesh(geometry, material);
+      scene.add(orb);
+
+      // Outer Glow
+      const glowGeo = new THREE.SphereGeometry(1.4, 32, 32);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: baseColor,
+        transparent: true,
+        opacity: 0.15,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide
+      });
+      glow = new THREE.Mesh(glowGeo, glowMat);
+      scene.add(glow);
+
+      // Particle Field
+      const starsGeometry = new THREE.BufferGeometry();
+      const starsCount = 400;
+      const starPositions = new Float32Array(starsCount * 3);
+      for (let i = 0; i < starsCount * 3; i += 3) {
+        starPositions[i] = (Math.random() - 0.5) * 15;
+        starPositions[i+1] = (Math.random() - 0.5) * 15;
+        starPositions[i+2] = (Math.random() - 0.5) * 15;
+      }
+      starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starsMaterial = new THREE.PointsMaterial({
+        color: 0x60a5fa,
+        size: 0.03,
+        transparent: true,
+        opacity: 0.6
+      });
+      const starField = new THREE.Points(starsGeometry, starsMaterial);
+      scene.add(starField);
+
+      // Event listener for resize
+      window.addEventListener('resize', onWindowResize);
+
+      // Bind gyroscope orientation updates
+      window.addEventListener('deviceorientation', handleOrientation);
+
+      animate();
+    }
+
+    function handleOrientation(event) {
+      if (event.beta !== null && event.gamma !== null) {
+        hasGyro = true;
+        gyro.alpha = event.alpha;
+        gyro.beta = event.beta;
+        gyro.gamma = event.gamma;
+        document.getElementById('debug-info').innerText = "Spatial Gyro Engine Online";
+      }
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // WHY: Updates scene color, pulse rates, and overlay elements dynamically when the Wasm state changes
+    function updateScene(sceneData) {
+      if (!sceneData) return;
+      
+      targetPulseRate = sceneData.orb_pulse_rate || 1.0;
+      targetColor.set(sceneData.orb_color || "#10b981");
+
+      if (sceneData.camera_fov) {
+        camera.fov = sceneData.camera_fov;
+        camera.updateProjectionMatrix();
+      }
+
+      // Update overlay floating widgets
+      const container = document.getElementById('ui-overlay');
+      container.innerHTML = '';
+      if (sceneData.widgets) {
+        sceneData.widgets.forEach(w => {
+          const card = document.createElement('div');
+          card.className = 'widget-card';
+          card.innerHTML = `
+            <div class="widget-title">${w.title}</div>
+            <p class="widget-detail">${w.detail}</p>
+          `;
+          container.appendChild(card);
+        });
+      }
+    }
+
+    // Subscribe to postMessage updates from React Native
+    window.addEventListener('message', (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.action === 'update_scene') {
+          updateScene(payload.scene);
+        }
+      } catch (e) {
+        // Handle parsing errors silently
+      }
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const elapsed = clock.getElapsedTime();
+      
+      // Interpolate colors and pulse rates
+      pulseRate += (targetPulseRate - pulseRate) * 0.05;
+      orb.material.color.lerp(targetColor, 0.05);
+      glow.material.color.copy(orb.material.color);
+
+      // Pulsing scale calculation
+      const scale = 1.0 + Math.sin(elapsed * Math.PI * pulseRate) * 0.08;
+      orb.scale.set(scale, scale, scale);
+      glow.scale.set(scale * 1.15, scale * 1.15, scale * 1.15);
+
+      // Rotate Orb
+      orb.rotation.y += 0.005;
+      orb.rotation.x += 0.002;
+
+      // Gyroscope tilt camera adjustments
+      if (hasGyro) {
+        // Map beta (-180 to 180) and gamma (-90 to 90) to rotation offsets
+        const targetRotX = (gyro.beta / 180) * Math.PI * 0.25;
+        const targetRotY = (gyro.gamma / 90) * Math.PI * 0.25;
+        
+        camera.rotation.x += (targetRotX - camera.rotation.x) * 0.1;
+        camera.rotation.y += (targetRotY - camera.rotation.y) * 0.1;
+      } else {
+        // Orbit camera rotation fallback
+        camera.position.x = Math.sin(elapsed * 0.1) * 0.5;
+        camera.position.y = Math.cos(elapsed * 0.15) * 0.3;
+        camera.lookAt(0, 0, 0);
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // Start rendering
+    init();
+  </script>
+</body>
+</html>
