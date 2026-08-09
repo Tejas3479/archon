@@ -15,29 +15,28 @@ export default function AuditPage() {
   const { status } = useSession();
   const router = useRouter();
 
-  const [logs, setLogs] = useState<AuditRecord[]>([
-    {
-      id: "log_1",
-      userId: "user_admin",
-      action: "approve_swap",
-      details: "Approved swap of 1.5 ETH to USDC",
-      createdAt: "2026-06-07T14:20:00.000Z"
-    },
-    {
-      id: "log_2",
-      userId: "user_member_1",
-      action: "trigger_reflection",
-      details: "Executed weekly self-reflection audit",
-      createdAt: "2026-06-07T15:32:00.000Z"
-    },
-    {
-      id: "log_3",
-      userId: "user_admin",
-      action: "invite_member",
-      details: "Invited user_member_2 with role 'member'",
-      createdAt: "2026-06-07T16:05:00.000Z"
+  const [logs, setLogs] = useState<AuditRecord[]>([]);
+
+  useEffect(() => {
+    async function fetchLogs() {
+      try {
+        const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL as string;
+        const API_KEY = process.env.NEXT_PUBLIC_GATEWAY_API_KEY as string;
+        const res = await fetch(`${GATEWAY_URL}/org/org_123/audit?format=json`, {
+          headers: { "Authorization": `Bearer ${API_KEY}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setLogs(data.audit_logs);
+        }
+      } catch (err) {
+        console.error("Failed to fetch audit logs", err);
+      }
     }
-  ]);
+    if (status === "authenticated") {
+      fetchLogs();
+    }
+  }, [status]);
   const [filterUser, setFilterUser] = useState("");
 
   useEffect(() => {
@@ -46,20 +45,26 @@ export default function AuditPage() {
     }
   }, [status]);
 
-  const handleDownloadCSV = () => {
-    // Generate mock CSV on-device and trigger direct download
-    const headers = ["ID", "User ID", "Action", "Details", "Created At"];
-    const rows = logs.map(l => [l.id, l.userId, l.action, `"${l.details}"`, l.createdAt]);
-    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "audit_compliance_report.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadCSV = async () => {
+    try {
+      const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL as string;
+      const API_KEY = process.env.NEXT_PUBLIC_GATEWAY_API_KEY as string;
+      const res = await fetch(`${GATEWAY_URL}/org/org_123/audit?format=csv`, {
+        headers: { "Authorization": `Bearer ${API_KEY}` }
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "audit_compliance_report.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (err) {
+      console.error("Failed to download CSV", err);
+    }
   };
 
   if (status !== "authenticated") {
