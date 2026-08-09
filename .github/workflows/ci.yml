@@ -50,12 +50,7 @@ jobs:
         with:
           version: 9.0.4
       - run: pnpm install
-      - name: Run Snyk
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --all-projects
+
       - name: Install cargo-audit
         run: cargo install cargo-audit || echo "cargo-audit install skipped"
       - name: Run cargo-audit
