@@ -27,7 +27,7 @@ export default function AuditPage() {
         });
         if (res.ok) {
           const data = await res.json();
-          setLogs(data.audit_logs);
+          setLogs(data.audit_logs || []);
         }
       } catch (err) {
         console.error("Failed to fetch audit logs", err);
