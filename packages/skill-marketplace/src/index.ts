@@ -56,7 +56,8 @@ app.post("/skills/install", async (c) => {
 
     let reviewResult: { safe: boolean; errors: string[]; report: string };
     try {
-      const response = await fetch("http://localhost:8787/sandbox/review", {
+      const GATEWAY_URL = process.env.GATEWAY_URL as string || "https://api.yourdomain.com";
+      const response = await fetch(`${GATEWAY_URL}/sandbox/review`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ skillId })

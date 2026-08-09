@@ -28,7 +28,7 @@ export default function TeamManagementScreen() {
 
     try {
       // Invite via simulated gateway API
-      const GATEWAY_URL = process.env.EXPO_PUBLIC_GATEWAY_URL || "http://localhost:8787";
+      const GATEWAY_URL = process.env.EXPO_PUBLIC_GATEWAY_URL as string;
       const res = await fetch(`${GATEWAY_URL}/org/${org?.id}/invite`, {
         method: "POST",
         headers: {
@@ -55,7 +55,7 @@ export default function TeamManagementScreen() {
 
   const handleRemoveMember = async (userId: string) => {
     try {
-      const GATEWAY_URL = process.env.EXPO_PUBLIC_GATEWAY_URL || "http://localhost:8787";
+      const GATEWAY_URL = process.env.EXPO_PUBLIC_GATEWAY_URL as string;
       const res = await fetch(`${GATEWAY_URL}/org/${org?.id}/member/${userId}`, {
         method: "DELETE",
         headers: {
